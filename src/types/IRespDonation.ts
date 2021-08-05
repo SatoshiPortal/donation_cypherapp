@@ -1,7 +1,7 @@
 import { IResponseError } from "./jsonrpc/IResponseMessage";
-import { DonationEntity } from "../entity/DonationEntity";
+import IDonationPublic from "./IDonationPublic";
 
 export default interface IRespGetDonation {
-  result?: DonationEntity;
+  result?: IDonationPublic;
   error?: IResponseError<never>;
 }

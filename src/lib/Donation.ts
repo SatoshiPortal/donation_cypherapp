@@ -58,10 +58,7 @@ class Donation {
       } else {
         let donationEntity = new DonationEntity();
 
-        donationEntity.donationToken = randomBytes(32).toString("hex");
-
-        // donationEntity.donationToken =
-        // "" + Math.round(Math.random() * 1000000000000);
+        donationEntity.donationToken = randomBytes(16).toString("hex");
 
         const callbackUrl =
           this._donationConfig.URL_API_SERVER +
@@ -132,7 +129,16 @@ class Donation {
         donationEntity.beneficiary = beneficiary;
         donationEntity = await this._donationDB.saveDonation(donationEntity);
 
-        response.result = donationEntity;
+        response.result = {
+          donationToken: donationEntity.donationToken,
+          bitcoinAddress: donationEntity.bitcoinAddress,
+          bolt11: donationEntity.bolt11,
+          lightning: donationEntity.lightning,
+          paymentDetails: donationEntity.paymentDetails,
+          amount: donationEntity.amount,
+          paidTimestamp: donationEntity.paidTimestamp,
+          beneficiaryDescription: donationEntity.beneficiary.description || "",
+        };
       }
     } else {
       // There is an error with inputs
@@ -167,7 +173,16 @@ class Donation {
           "Donation.getDonation, donationEntity found for this donationToken!"
         );
 
-        response.result = donationEntity;
+        response.result = {
+          donationToken: donationEntity.donationToken,
+          bitcoinAddress: donationEntity.bitcoinAddress,
+          bolt11: donationEntity.bolt11,
+          lightning: donationEntity.lightning,
+          paymentDetails: donationEntity.paymentDetails,
+          amount: donationEntity.amount,
+          paidTimestamp: donationEntity.paidTimestamp,
+          beneficiaryDescription: donationEntity.beneficiary.description || "",
+        };
       } else {
         // Active Donation not found
         logger.debug("Donation.getDonation, Donation not found.");
