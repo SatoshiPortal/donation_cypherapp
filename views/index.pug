@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    title= pageTitle
+    script(src="/static/qrious.min.js") 
+    style(src="/static/donate.css")
+
+  body
+    p
+      | If you want to donate using Lightning Network: #[canvas#qrln]
+      | #{bolt11}
+
+    p
+      | If you want to donate using on-chain Bitcoin:  #[canvas#qrbtc]
+      | #{btcaddr}
+
+  script.
+    new QRious({element: document.getElementById('qrln'), value: "#{bolt11}", size: 300});
+    new QRious({element: document.getElementById('qrbtc'), value: "#{bitcoinAddress}", size: 100});
