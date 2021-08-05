@@ -3,6 +3,7 @@ export default interface IDonationPublic {
   bitcoinAddress?: string;
   bolt11?: string;
   lightning?: boolean;
+  lnInvoiceStatus?: string;
   paymentDetails?: string;
   amount?: number;
   paidTimestamp?: Date;

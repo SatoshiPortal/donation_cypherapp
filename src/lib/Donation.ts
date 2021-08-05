@@ -69,16 +69,13 @@ class Donation {
           donationEntity.donationToken;
 
         // Let's create a lightning invoice
+        const label: string =
+          "donation-" + beneficiary.label + "-" + donationEntity.donationToken;
+
         const lnCreateInvoiceTO: IReqLnCreateInvoice = {
-          label:
-            "donation-" +
-            this._donationConfig.DONATION_BENEFICIARY_LABEL +
-            "-" +
-            donationEntity.donationToken,
+          label,
           description:
-            "Thanks for your donation to " +
-            this._donationConfig.DONATION_BENEFICIARY_DESCRIPTION +
-            "!",
+            "Thanks for your donation to " + beneficiary.description + "!",
           callbackUrl,
         };
         const lnResp = await this._cyphernodeClient.lnCreateInvoice(
@@ -173,11 +170,31 @@ class Donation {
           "Donation.getDonation, donationEntity found for this donationToken!"
         );
 
+        const label: string =
+          "donation-" +
+          donationEntity.beneficiary.label +
+          "-" +
+          donationEntity.donationToken;
+
+        const lnResp = await this._cyphernodeClient.lnGetInvoice(label);
+        let lnInvoiceStatus: string;
+
+        logger.debug("Donation.getDonation, lnResp:", lnResp);
+
+        if (lnResp.result) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          lnInvoiceStatus = (lnResp.result as any).invoices[0].status;
+        } else {
+          lnInvoiceStatus = "NA";
+        }
+        logger.debug("Donation.getDonation, lnInvoiceStatus:", lnInvoiceStatus);
+
         response.result = {
           donationToken: donationEntity.donationToken,
           bitcoinAddress: donationEntity.bitcoinAddress,
           bolt11: donationEntity.bolt11,
           lightning: donationEntity.lightning,
+          lnInvoiceStatus,
           paymentDetails: donationEntity.paymentDetails,
           amount: donationEntity.amount,
           paidTimestamp: donationEntity.paidTimestamp,
