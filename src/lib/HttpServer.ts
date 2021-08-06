@@ -10,8 +10,8 @@ import {
 } from "../types/jsonrpc/IResponseMessage";
 import { IRequestMessage } from "../types/jsonrpc/IRequestMessage";
 import path from "path";
-import { CyphernodeClient } from "./CyphernodeClient";
-import { DonationDB } from "./DonationDB";
+// import { CyphernodeClient } from "./CyphernodeClient";
+// import { DonationDB } from "./DonationDB";
 import IReqCreateDonation from "../types/IReqCreateDonation";
 import { Donation } from "./Donation";
 import IRespDonation from "../types/IRespDonation";
@@ -23,10 +23,10 @@ class HttpServer {
   private _donationConfig: DonationConfig = JSON.parse(
     fs.readFileSync("data/config.json", "utf8")
   );
-  private _donationDB: DonationDB = new DonationDB(this._donationConfig);
-  private _cyphernodeClient: CyphernodeClient = new CyphernodeClient(
-    this._donationConfig
-  );
+  // private _donationDB: DonationDB = new DonationDB(this._donationConfig);
+  // private _cyphernodeClient: CyphernodeClient = new CyphernodeClient(
+  //   this._donationConfig
+  // );
   private _donation: Donation = new Donation(this._donationConfig);
 
   setup(): void {
@@ -37,9 +37,9 @@ class HttpServer {
     this._httpServer.set("views", "views");
     this._httpServer.use("/static", express.static("static"));
 
-    this._donationDB.configureDB(this._donationConfig).then(() => {
-      this._cyphernodeClient = new CyphernodeClient(this._donationConfig);
-    });
+    // this._donationDB.configureDB(this._donationConfig).then(() => {
+    //   this._cyphernodeClient = new CyphernodeClient(this._donationConfig);
+    // });
   }
 
   async loadConfig(): Promise<void> {
@@ -48,11 +48,11 @@ class HttpServer {
     this._donationConfig = JSON.parse(
       fs.readFileSync("data/config.json", "utf8")
     );
-    this._cyphernodeClient.configureCyphernode(this._donationConfig);
 
-    this._donationDB.configureDB(this._donationConfig).then(() => {
-      this._cyphernodeClient.configureCyphernode(this._donationConfig);
-    });
+    this._donation.configureDonation(this._donationConfig);
+    // this._donationDB.configureDB(this._donationConfig).then(() => {
+    //   this._cyphernodeClient.configureCyphernode(this._donationConfig);
+    // });
   }
 
   async createDonation(params: object | undefined): Promise<IRespDonation> {

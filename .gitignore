@@ -107,5 +107,5 @@ logs
 build
 data
 !cypherapps/data
-*.sqlite
+*.sqlite*
 *.pem
