@@ -96,12 +96,10 @@ class Donation {
           lnInvoiceStatus = "NA";
         }
 
-        // If donation address is fixed in the database, let's return that
         // If xpub is set in the database, let's derive next address
-        // Else, let's getnewaddress from cyphernode
-        if (beneficiary.bitcoinAddress) {
-          donationEntity.bitcoinAddress = beneficiary.bitcoinAddress;
-        } else if (beneficiary.xpub) {
+        // If not or xpub derivation didn't work, if donation address is fixed in the database, let's return that
+        // If no fixed address in database, let's getnewaddress from cyphernode
+        if (beneficiary.xpub) {
           const addresses = await this._cyphernodeClient.derivePubPath({
             pub32: beneficiary.xpub,
             path: beneficiary.path + "/" + ((beneficiary.xpubIndex || 0) + 1),
@@ -111,10 +109,15 @@ class Donation {
               addresses.result?.addresses[0].address;
             beneficiary.xpubIndex = (beneficiary.xpubIndex || 0) + 1;
           }
-        } else {
-          const btcResp = await this._cyphernodeClient.getNewBitcoinAddress();
-          if (btcResp.result) {
-            donationEntity.bitcoinAddress = btcResp.result.address;
+        }
+        if (!donationEntity.bitcoinAddress) {
+          if (beneficiary.bitcoinAddress) {
+            donationEntity.bitcoinAddress = beneficiary.bitcoinAddress;
+          } else {
+            const btcResp = await this._cyphernodeClient.getNewBitcoinAddress();
+            if (btcResp.result) {
+              donationEntity.bitcoinAddress = btcResp.result.address;
+            }
           }
         }
 
@@ -138,15 +141,21 @@ class Donation {
         response.result = {
           donationToken: donationEntity.donationToken,
           bitcoinAddress: donationEntity.bitcoinAddress,
-          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails || "",
-          bitcoinPaidTimestamp: donationEntity.bitcoinPaidTimestamp,
+          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails
+            ? JSON.parse(donationEntity.bitcoinPaymentDetails)
+            : null,
+          bitcoinPaidTimestamp: new Date(
+            donationEntity.bitcoinPaidTimestamp || 0
+          ),
           bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
           lnInvoiceStatus,
-          lnPaymentDetails: donationEntity.lnPaymentDetails,
-          lnPaidTimestamp: donationEntity.lnPaidTimestamp,
+          lnPaymentDetails: donationEntity.lnPaymentDetails
+            ? JSON.parse(donationEntity.lnPaymentDetails)
+            : null,
+          lnPaidTimestamp: new Date(donationEntity.lnPaidTimestamp || 0),
           lnMsatoshi: donationEntity.lnMsatoshi,
-          beneficiaryDescription: donationEntity.beneficiary.description || "",
+          beneficiaryDescription: donationEntity.beneficiary.description,
         };
       }
     } else {
@@ -204,15 +213,21 @@ class Donation {
         response.result = {
           donationToken: donationEntity.donationToken,
           bitcoinAddress: donationEntity.bitcoinAddress,
-          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails || "",
-          bitcoinPaidTimestamp: donationEntity.bitcoinPaidTimestamp,
+          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails
+            ? JSON.parse(donationEntity.bitcoinPaymentDetails)
+            : null,
+          bitcoinPaidTimestamp: new Date(
+            donationEntity.bitcoinPaidTimestamp || 0
+          ),
           bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
           lnInvoiceStatus,
-          lnPaymentDetails: donationEntity.lnPaymentDetails,
-          lnPaidTimestamp: donationEntity.lnPaidTimestamp,
+          lnPaymentDetails: donationEntity.lnPaymentDetails
+            ? JSON.parse(donationEntity.lnPaymentDetails)
+            : null,
+          lnPaidTimestamp: new Date(donationEntity.lnPaidTimestamp || 0),
           lnMsatoshi: donationEntity.lnMsatoshi,
-          beneficiaryDescription: donationEntity.beneficiary.description || "",
+          beneficiaryDescription: donationEntity.beneficiary.description,
         };
       } else {
         // Active Donation not found
@@ -255,7 +270,7 @@ class Donation {
       if (webhookBody.bolt11) {
         // This means the payment was made using LN
         donationEntity.lnPaymentDetails = JSON.stringify(webhookBody);
-        donationEntity.lnPaidTimestamp = new Date();
+        donationEntity.lnPaidTimestamp = new Date().valueOf();
         donationEntity.lnMsatoshi = webhookBody.msatoshi_received;
         // if (donationEntity.cnWatchId) {
         //   this._cyphernodeClient.unwatch(donationEntity.cnWatchId);
@@ -263,7 +278,7 @@ class Donation {
       } else {
         // This means the payment was made on-chain
         donationEntity.bitcoinPaymentDetails = JSON.stringify(webhookBody);
-        donationEntity.bitcoinPaidTimestamp = new Date();
+        donationEntity.bitcoinPaidTimestamp = new Date().valueOf();
         donationEntity.bitcoinAmount = webhookBody.sent_amount;
       }
       this._donationDB.saveDonation(donationEntity);

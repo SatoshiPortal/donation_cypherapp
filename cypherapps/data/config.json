@@ -10,9 +10,5 @@
     "SESSION_TIMEOUT": 600,
     "CN_URL": "https://gatekeeper:2009/v0",
     "CN_API_ID": "003",
-    "CN_API_KEY": "bdd3fc82dff1fb9193a9c15c676e79da10367a540a85cb50b736e77f452f9dc6",
-    "DONATION_BENEFICIARY_LABEL": "olivier",
-    "DONATION_BENEFICIARY_DESCRIPTION": "Olivier Aubin",
-    "STATIC_BITCOIN_ADDRESS": false,
-    "DONATION_BITCOIN_ADDRESS": "This is a Bitcoin address"
+    "CN_API_KEY": "bdd3fc82dff1fb9193a9c15c676e79da10367a540a85cb50b736e77f452f9dc6"
 }

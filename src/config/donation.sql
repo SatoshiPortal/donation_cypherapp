@@ -22,7 +22,7 @@ CREATE TABLE donation (
   bitcoin_payment_details TEXT,
   bitcoin_paid_ts INTEGER,
   bitcoin_amount REAL,
-  cn_watch_id INTEGER UNIQUE,
+  cn_watch_id INTEGER,
   bolt11 TEXT UNIQUE,
   ln_payment_details TEXT,
   ln_paid_ts INTEGER,

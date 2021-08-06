@@ -9,5 +9,5 @@ export default interface IDonationPublic {
   lnPaymentDetails?: string;
   lnMsatoshi?: number;
   lnPaidTimestamp?: Date;
-  beneficiaryDescription: string;
+  beneficiaryDescription?: string;
 }

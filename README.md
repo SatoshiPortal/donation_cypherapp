@@ -40,6 +40,8 @@ CREATE TABLE beneficiary (
 ```bash
 dexec donation apk add sqlite
 dexec donation sqlite3 data/donation.sqlite "insert into beneficiary (label, description) values (\"olivier\", \"Olivier 'The Canadian Gangster' Aubin-Mercier\")"
+dexec donation sqlite3 data/donation.sqlite -header "update beneficiary set xpub='vpub5SLqN2bLY4WeZF3kL4VqiWF1itbf3A6oRrq9aPf16AZMVWYCuN9TxpAZwCzVgW94TNzZPNc9XAHD4As6pdnExBtCDGYRmNJrcJ4eV9hNqcv',path='0' where label='olivier'"
+
 ```
 
 ## From a web browser
@@ -131,3 +133,5 @@ curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donat
   }
 }
 ```
+
+dexec lightning lightning-cli --lightning-dir=/.lightning listinvoices | jq -Mc '.invoices | map(select((.label | startswith("donation-olivier-")) and .status == "paid"))'

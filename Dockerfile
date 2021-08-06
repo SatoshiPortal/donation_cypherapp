@@ -9,19 +9,23 @@ RUN apk add --update --no-cache --virtual .gyp \
   make \
   g++
 RUN npm install
+# RUN apk del .gyp
 
 #---------------------------------------------------
 
-FROM build-base as base-slim
-WORKDIR /donation
+#FROM build-base as base-slim
+#WORKDIR /donation
 
-RUN apk del .gyp
+#RUN apk del .gyp
 
 #---------------------------------------------------
 
-FROM base-slim
+#FROM base-slim
+FROM node:14.11.0-alpine3.11
 WORKDIR /donation
 
+COPY --from=build-base /donation/node_modules/ /donation/node_modules/
+COPY package.json /donation
 COPY tsconfig.json /donation
 COPY src /donation/src
 

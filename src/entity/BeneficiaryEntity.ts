@@ -59,8 +59,8 @@ export class BeneficiaryEntity {
   donations!: DonationEntity[];
 
   @CreateDateColumn({ type: "integer", name: "created_ts" })
-  createdAt?: Date;
+  createdAt?: number;
 
   @UpdateDateColumn({ type: "integer", name: "updated_ts" })
-  updatedAt?: Date;
+  updatedAt?: number;
 }

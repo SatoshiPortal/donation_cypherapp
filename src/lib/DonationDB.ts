@@ -31,11 +31,12 @@ class DonationDB {
     logger.info("DonationDB.initDatabase", dbName);
 
     return await createConnection({
-      type: "sqlite",
+      type: "better-sqlite3",
       database: dbName,
       entities: [BeneficiaryEntity, DonationEntity],
       synchronize: true,
-      logging: true,
+      logging: "all",
+      // busyErrorRetry: 1000,
     });
   }
 
@@ -43,14 +44,6 @@ class DonationDB {
     const d = await this._db?.manager
       .getRepository(DonationEntity)
       .save(donation);
-
-    // We need to instantiate a new Date with expiration:
-    // https://github.com/typeorm/typeorm/issues/4320
-    if (d) {
-      if (d.bitcoinPaidTimestamp)
-        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
-      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
-    }
 
     return d as DonationEntity;
   }
@@ -60,14 +53,6 @@ class DonationDB {
       .getRepository(DonationEntity)
       .findOne({ donationToken }, { relations: ["beneficiary"] });
 
-    // We need to instantiate a new Date with expiration:
-    // https://github.com/typeorm/typeorm/issues/4320
-    if (d) {
-      if (d.bitcoinPaidTimestamp)
-        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
-      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
-    }
-
     return d as DonationEntity;
   }
 
@@ -76,14 +61,6 @@ class DonationDB {
       .getRepository(DonationEntity)
       .findOne(donationEntity);
 
-    // We need to instantiate a new Date with expiration:
-    // https://github.com/typeorm/typeorm/issues/4320
-    if (d) {
-      if (d.bitcoinPaidTimestamp)
-        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
-      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
-    }
-
     return d as DonationEntity;
   }
 
@@ -91,14 +68,6 @@ class DonationDB {
     const d = await this._db?.manager
       .getRepository(DonationEntity)
       .findOne(donationId);
-
-    // We need to instantiate a new Date with expiration:
-    // https://github.com/typeorm/typeorm/issues/4320
-    if (d) {
-      if (d.bitcoinPaidTimestamp)
-        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
-      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
-    }
 
     return d as DonationEntity;
   }

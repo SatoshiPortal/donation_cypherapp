@@ -174,8 +174,8 @@ class HttpServer {
         });
       } else {
         res.render("index", {
-          bolt11: "Error",
-          bitcoinAddress: this._donationConfig.DONATION_BITCOIN_ADDRESS,
+          bolt11: respDonation.error?.message,
+          bitcoinAddress: respDonation.error?.message,
         });
       }
     });

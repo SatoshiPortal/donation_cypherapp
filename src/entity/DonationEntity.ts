@@ -17,7 +17,7 @@ import { BeneficiaryEntity } from "./BeneficiaryEntity";
 //   bitcoin_payment_details TEXT,
 //   bitcoin_paid_ts INTEGER,
 //   bitcoin_amount REAL,
-//   cn_watch_id INTEGER UNIQUE,
+//   cn_watch_id INTEGER,
 //   bolt11 TEXT UNIQUE,
 //   ln_payment_details TEXT,
 //   ln_paid_ts INTEGER,
@@ -46,12 +46,12 @@ export class DonationEntity {
   bitcoinPaymentDetails?: string;
 
   @Column({ type: "integer", name: "bitcoin_paid_ts", nullable: true })
-  bitcoinPaidTimestamp?: Date;
+  bitcoinPaidTimestamp?: number;
 
   @Column({ type: "real", name: "bitcoin_amount", nullable: true })
   bitcoinAmount?: number;
 
-  @Column({ type: "integer", name: "cn_watch_id", unique: true })
+  @Column({ type: "integer", name: "cn_watch_id", nullable: true })
   cnWatchId?: number;
 
   @Column({ type: "text", name: "bolt11", unique: true, nullable: true })
@@ -64,15 +64,17 @@ export class DonationEntity {
   lnMsatoshi?: number;
 
   @Column({ type: "integer", name: "ln_paid_ts", nullable: true })
-  lnPaidTimestamp?: Date;
+  lnPaidTimestamp?: number;
 
-  @ManyToOne(() => BeneficiaryEntity, (beneficiary) => beneficiary.donations)
+  @ManyToOne(() => BeneficiaryEntity, (beneficiary) => beneficiary.donations, {
+    cascade: true,
+  })
   @JoinColumn({ name: "beneficiary_id" })
   beneficiary!: BeneficiaryEntity;
 
   @CreateDateColumn({ type: "integer", name: "created_ts" })
-  createdAt?: Date;
+  createdAt?: number;
 
   @UpdateDateColumn({ type: "integer", name: "updated_ts" })
-  updatedAt?: Date;
+  updatedAt?: number;
 }

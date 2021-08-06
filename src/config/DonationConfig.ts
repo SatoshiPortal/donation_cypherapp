@@ -11,8 +11,4 @@ export default interface DonationConfig {
   CN_URL: string;
   CN_API_ID: string;
   CN_API_KEY: string;
-  DONATION_BENEFICIARY_LABEL: string;
-  DONATION_BENEFICIARY_DESCRIPTION: string;
-  STATIC_BITCOIN_ADDRESS: boolean;
-  DONATION_BITCOIN_ADDRESS: string;
 }
