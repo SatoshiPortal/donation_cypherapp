@@ -141,22 +141,28 @@ class Donation {
         response.result = {
           donationToken: donationEntity.donationToken,
           bitcoinAddress: donationEntity.bitcoinAddress,
-          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails
-            ? JSON.parse(donationEntity.bitcoinPaymentDetails)
-            : null,
-          bitcoinPaidTimestamp: new Date(
-            donationEntity.bitcoinPaidTimestamp || 0
-          ),
           bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
           lnInvoiceStatus,
-          lnPaymentDetails: donationEntity.lnPaymentDetails
-            ? JSON.parse(donationEntity.lnPaymentDetails)
-            : null,
-          lnPaidTimestamp: new Date(donationEntity.lnPaidTimestamp || 0),
           lnMsatoshi: donationEntity.lnMsatoshi,
           beneficiaryDescription: donationEntity.beneficiary.description,
         };
+        if (donationEntity.lnPaidTimestamp) {
+          response.result = Object.assign(response.result, {
+            lnPaidTimestamp: new Date(donationEntity.lnPaidTimestamp),
+            lnPaymentDetails: donationEntity.lnPaymentDetails
+              ? JSON.parse(donationEntity.lnPaymentDetails)
+              : null,
+          });
+        }
+        if (donationEntity.bitcoinPaidTimestamp) {
+          response.result = Object.assign(response.result, {
+            bitcoinPaidTimestamp: new Date(donationEntity.bitcoinPaidTimestamp),
+            bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails
+              ? JSON.parse(donationEntity.bitcoinPaymentDetails)
+              : null,
+          });
+        }
       }
     } else {
       // There is an error with inputs
@@ -213,22 +219,28 @@ class Donation {
         response.result = {
           donationToken: donationEntity.donationToken,
           bitcoinAddress: donationEntity.bitcoinAddress,
-          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails
-            ? JSON.parse(donationEntity.bitcoinPaymentDetails)
-            : null,
-          bitcoinPaidTimestamp: new Date(
-            donationEntity.bitcoinPaidTimestamp || 0
-          ),
           bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
           lnInvoiceStatus,
-          lnPaymentDetails: donationEntity.lnPaymentDetails
-            ? JSON.parse(donationEntity.lnPaymentDetails)
-            : null,
-          lnPaidTimestamp: new Date(donationEntity.lnPaidTimestamp || 0),
           lnMsatoshi: donationEntity.lnMsatoshi,
           beneficiaryDescription: donationEntity.beneficiary.description,
         };
+        if (donationEntity.lnPaidTimestamp) {
+          response.result = Object.assign(response.result, {
+            lnPaidTimestamp: new Date(donationEntity.lnPaidTimestamp),
+            lnPaymentDetails: donationEntity.lnPaymentDetails
+              ? JSON.parse(donationEntity.lnPaymentDetails)
+              : null,
+          });
+        }
+        if (donationEntity.bitcoinPaidTimestamp) {
+          response.result = Object.assign(response.result, {
+            bitcoinPaidTimestamp: new Date(donationEntity.bitcoinPaidTimestamp),
+            bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails
+              ? JSON.parse(donationEntity.bitcoinPaymentDetails)
+              : null,
+          });
+        }
       } else {
         // Active Donation not found
         logger.debug("Donation.getDonation, Donation not found.");
