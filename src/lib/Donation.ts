@@ -42,13 +42,15 @@ class Donation {
 
     if (CreateDonationValidator.validateRequest(donationReq)) {
       // Inputs are valid.
-      logger.debug("Donation.lnServiceWithdraw, Inputs are valid.");
+      logger.debug("Donation.createDonation, Inputs are valid.");
 
       // First check if beneficiary is valid
 
       const beneficiary = await this._donationDB.getBeneficiaryByLabel(
         donationReq.beneficiaryLabel
       );
+
+      // logger.debug("Donation.createDonation, beneficiary:", beneficiary);
 
       if (!beneficiary || !beneficiary.active) {
         response.error = {
@@ -81,6 +83,8 @@ class Donation {
         const lnResp = await this._cyphernodeClient.lnCreateInvoice(
           lnCreateInvoiceTO
         );
+
+        // logger.debug("Donation.createDonation, lnResp:", lnResp);
 
         if (lnResp.result) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
