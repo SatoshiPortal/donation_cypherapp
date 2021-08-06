@@ -83,12 +83,17 @@ class Donation {
         const lnResp = await this._cyphernodeClient.lnCreateInvoice(
           lnCreateInvoiceTO
         );
+        let lnInvoiceStatus: string;
 
         // logger.debug("Donation.createDonation, lnResp:", lnResp);
 
         if (lnResp.result) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           donationEntity.bolt11 = (lnResp.result as any).bolt11;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          lnInvoiceStatus = (lnResp.result as any).status;
+        } else {
+          lnInvoiceStatus = "NA";
         }
 
         // If donation address is fixed in the database, let's return that
@@ -137,6 +142,7 @@ class Donation {
           bitcoinPaidTimestamp: donationEntity.bitcoinPaidTimestamp,
           bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
+          lnInvoiceStatus,
           lnPaymentDetails: donationEntity.lnPaymentDetails,
           lnPaidTimestamp: donationEntity.lnPaidTimestamp,
           lnMsatoshi: donationEntity.lnMsatoshi,
@@ -185,7 +191,7 @@ class Donation {
         const lnResp = await this._cyphernodeClient.lnGetInvoice(label);
         let lnInvoiceStatus: string;
 
-        logger.debug("Donation.getDonation, lnResp:", lnResp);
+        // logger.debug("Donation.getDonation, lnResp:", lnResp);
 
         if (lnResp.result) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -202,6 +208,7 @@ class Donation {
           bitcoinPaidTimestamp: donationEntity.bitcoinPaidTimestamp,
           bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
+          lnInvoiceStatus,
           lnPaymentDetails: donationEntity.lnPaymentDetails,
           lnPaidTimestamp: donationEntity.lnPaidTimestamp,
           lnMsatoshi: donationEntity.lnMsatoshi,
