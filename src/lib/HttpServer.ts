@@ -117,33 +117,6 @@ class HttpServer {
           }
 
           case "getDonation": {
-            // // First check if beneficiary is valid
-
-            // const beneficiary: string = reqMessage.params
-            //   ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            //     (reqMessage.params as any).beneficiary
-            //   : "";
-            // logger.debug("beneficiary:", beneficiary);
-            // if (
-            //   !beneficiary ||
-            //   beneficiary.toLowerCase() !==
-            //     this._donationConfig.DONATION_BENEFICIARY_LABEL.toLowerCase()
-            // ) {
-            //   response.error = {
-            //     code: ErrorCodes.MethodNotFound,
-            //     message: "No such beneficiary!",
-            //   };
-            // } else {
-            //   const label: string = req.params.label;
-            //   const resp = await this._cyphernodeClient.lnGetInvoice(label);
-
-            //   if (resp.result) {
-            //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            //     response.result = { status: (resp as any).status };
-            //   } else {
-            //     response.error = resp.error;
-            //   }
-            // }
             let result: IRespDonation = {};
 
             result = await this._lock.acquire(

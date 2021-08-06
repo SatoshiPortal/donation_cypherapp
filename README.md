@@ -31,7 +31,7 @@ CREATE TABLE beneficiary (
   updated_ts INTEGER DEFAULT CURRENT_TIMESTAMP
 );
 
-insert into beneficiary (label, description) values ("olivier", "Olivier Aubin")
+sqlite3 data/donation.sqlite 'insert into beneficiary (label, description) values ("olivier", "Olivier \'The Canadian Gangster\' Aubin-Mercier")'
 
 ## From a web browser
 

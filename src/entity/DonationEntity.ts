@@ -14,12 +14,14 @@ import { BeneficiaryEntity } from "./BeneficiaryEntity";
 //   id INTEGER PRIMARY KEY AUTOINCREMENT,
 //   donation_token TEXT UNIQUE,
 //   bitcoin_address TEXT,
+//   bitcoin_payment_details TEXT,
+//   bitcoin_paid_ts INTEGER,
+//   bitcoin_amount REAL,
 //   cn_watch_id INTEGER UNIQUE,
 //   bolt11 TEXT UNIQUE,
-//   lightning INTEGER DEFAULT FALSE,
-//   payment_details TEXT,
-//   paid_ts INTEGER,
-//   amount REAL,
+//   ln_payment_details TEXT,
+//   ln_paid_ts INTEGER,
+//   ln_msatoshi INTEGER,
 //   beneficiary_id INTEGER REFERENCES beneficiary,
 //   created_ts INTEGER DEFAULT CURRENT_TIMESTAMP,
 //   updated_ts INTEGER DEFAULT CURRENT_TIMESTAMP
@@ -40,28 +42,29 @@ export class DonationEntity {
   @Column({ type: "text", name: "bitcoin_address", nullable: true })
   bitcoinAddress?: string;
 
+  @Column({ type: "text", name: "bitcoin_payment_details", nullable: true })
+  bitcoinPaymentDetails?: string;
+
+  @Column({ type: "integer", name: "bitcoin_paid_ts", nullable: true })
+  bitcoinPaidTimestamp?: Date;
+
+  @Column({ type: "real", name: "bitcoin_amount", nullable: true })
+  bitcoinAmount?: number;
+
   @Column({ type: "integer", name: "cn_watch_id", unique: true })
   cnWatchId?: number;
 
   @Column({ type: "text", name: "bolt11", unique: true, nullable: true })
   bolt11?: string;
 
-  @Column({
-    type: "integer",
-    name: "lightning",
-    nullable: true,
-    default: false,
-  })
-  lightning?: boolean;
+  @Column({ type: "text", name: "ln_payment_details", nullable: true })
+  lnPaymentDetails?: string;
 
-  @Column({ type: "text", name: "payment_details", nullable: true })
-  paymentDetails?: string;
+  @Column({ type: "real", name: "ln_msatoshi", nullable: true })
+  lnMsatoshi?: number;
 
-  @Column({ type: "real", name: "amount", nullable: true })
-  amount?: number;
-
-  @Column({ type: "integer", name: "paid_ts", nullable: true })
-  paidTimestamp?: Date;
+  @Column({ type: "integer", name: "ln_paid_ts", nullable: true })
+  lnPaidTimestamp?: Date;
 
   @ManyToOne(() => BeneficiaryEntity, (beneficiary) => beneficiary.donations)
   @JoinColumn({ name: "beneficiary_id" })

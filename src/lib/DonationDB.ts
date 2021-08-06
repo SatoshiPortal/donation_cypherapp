@@ -47,8 +47,9 @@ class DonationDB {
     // We need to instantiate a new Date with expiration:
     // https://github.com/typeorm/typeorm/issues/4320
     if (d) {
-      if (d.paidTimestamp) d.paidTimestamp = new Date(d.paidTimestamp);
-      d.lightning = ((d.lightning as unknown) as number) == 1;
+      if (d.bitcoinPaidTimestamp)
+        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
+      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
     }
 
     return d as DonationEntity;
@@ -62,8 +63,9 @@ class DonationDB {
     // We need to instantiate a new Date with expiration:
     // https://github.com/typeorm/typeorm/issues/4320
     if (d) {
-      if (d.paidTimestamp) d.paidTimestamp = new Date(d.paidTimestamp);
-      d.lightning = ((d.lightning as unknown) as number) == 1;
+      if (d.bitcoinPaidTimestamp)
+        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
+      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
     }
 
     return d as DonationEntity;
@@ -77,8 +79,9 @@ class DonationDB {
     // We need to instantiate a new Date with expiration:
     // https://github.com/typeorm/typeorm/issues/4320
     if (d) {
-      if (d.paidTimestamp) d.paidTimestamp = new Date(d.paidTimestamp);
-      d.lightning = ((d.lightning as unknown) as number) == 1;
+      if (d.bitcoinPaidTimestamp)
+        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
+      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
     }
 
     return d as DonationEntity;
@@ -92,8 +95,9 @@ class DonationDB {
     // We need to instantiate a new Date with expiration:
     // https://github.com/typeorm/typeorm/issues/4320
     if (d) {
-      if (d.paidTimestamp) d.paidTimestamp = new Date(d.paidTimestamp);
-      d.lightning = ((d.lightning as unknown) as number) == 1;
+      if (d.bitcoinPaidTimestamp)
+        d.bitcoinPaidTimestamp = new Date(d.bitcoinPaidTimestamp);
+      if (d.lnPaidTimestamp) d.lnPaidTimestamp = new Date(d.lnPaidTimestamp);
     }
 
     return d as DonationEntity;

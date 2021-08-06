@@ -68,7 +68,7 @@ class Donation {
           "/" +
           donationEntity.donationToken;
 
-        // Let's create a lightning invoice
+        // Let's create a ln invoice
         const label: string =
           "donation-" + beneficiary.label + "-" + donationEntity.donationToken;
 
@@ -129,11 +129,13 @@ class Donation {
         response.result = {
           donationToken: donationEntity.donationToken,
           bitcoinAddress: donationEntity.bitcoinAddress,
+          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails || "",
+          bitcoinPaidTimestamp: donationEntity.bitcoinPaidTimestamp,
+          bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
-          lightning: donationEntity.lightning,
-          paymentDetails: donationEntity.paymentDetails,
-          amount: donationEntity.amount,
-          paidTimestamp: donationEntity.paidTimestamp,
+          lnPaymentDetails: donationEntity.lnPaymentDetails,
+          lnPaidTimestamp: donationEntity.lnPaidTimestamp,
+          lnMsatoshi: donationEntity.lnMsatoshi,
           beneficiaryDescription: donationEntity.beneficiary.description || "",
         };
       }
@@ -192,12 +194,13 @@ class Donation {
         response.result = {
           donationToken: donationEntity.donationToken,
           bitcoinAddress: donationEntity.bitcoinAddress,
+          bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails || "",
+          bitcoinPaidTimestamp: donationEntity.bitcoinPaidTimestamp,
+          bitcoinAmount: donationEntity.bitcoinAmount,
           bolt11: donationEntity.bolt11,
-          lightning: donationEntity.lightning,
-          lnInvoiceStatus,
-          paymentDetails: donationEntity.paymentDetails,
-          amount: donationEntity.amount,
-          paidTimestamp: donationEntity.paidTimestamp,
+          lnPaymentDetails: donationEntity.lnPaymentDetails,
+          lnPaidTimestamp: donationEntity.lnPaidTimestamp,
+          lnMsatoshi: donationEntity.lnMsatoshi,
           beneficiaryDescription: donationEntity.beneficiary.description || "",
         };
       } else {
@@ -238,18 +241,19 @@ class Donation {
     let result;
 
     if (donationEntity) {
-      donationEntity.paymentDetails = JSON.stringify(webhookBody);
-      donationEntity.paidTimestamp = new Date();
       if (webhookBody.bolt11) {
         // This means the payment was made using LN
-        donationEntity.lightning = true;
-        donationEntity.amount = webhookBody.msatoshi_received;
-        if (donationEntity.cnWatchId) {
-          this._cyphernodeClient.unwatch(donationEntity.cnWatchId);
-        }
+        donationEntity.lnPaymentDetails = JSON.stringify(webhookBody);
+        donationEntity.lnPaidTimestamp = new Date();
+        donationEntity.lnMsatoshi = webhookBody.msatoshi_received;
+        // if (donationEntity.cnWatchId) {
+        //   this._cyphernodeClient.unwatch(donationEntity.cnWatchId);
+        // }
       } else {
         // This means the payment was made on-chain
-        donationEntity.amount = webhookBody.sent_amount;
+        donationEntity.bitcoinPaymentDetails = JSON.stringify(webhookBody);
+        donationEntity.bitcoinPaidTimestamp = new Date();
+        donationEntity.bitcoinAmount = webhookBody.sent_amount;
       }
       this._donationDB.saveDonation(donationEntity);
 

@@ -1,11 +1,13 @@
 export default interface IDonationPublic {
   donationToken: string;
   bitcoinAddress?: string;
+  bitcoinPaymentDetails?: string;
+  bitcoinAmount?: number;
+  bitcoinPaidTimestamp?: Date;
   bolt11?: string;
-  lightning?: boolean;
   lnInvoiceStatus?: string;
-  paymentDetails?: string;
-  amount?: number;
-  paidTimestamp?: Date;
+  lnPaymentDetails?: string;
+  lnMsatoshi?: number;
+  lnPaidTimestamp?: Date;
   beneficiaryDescription: string;
 }
