@@ -30,14 +30,18 @@ class DonationDB {
   async initDatabase(dbName: string): Promise<Connection> {
     logger.info("DonationDB.initDatabase", dbName);
 
-    return await createConnection({
+    const conn = await createConnection({
       type: "better-sqlite3",
       database: dbName,
       entities: [BeneficiaryEntity, DonationEntity],
-      synchronize: true,
+      synchronize: false,
       logging: "all",
       // busyErrorRetry: 1000,
     });
+    await conn.query("PRAGMA foreign_keys=OFF");
+    await conn.synchronize();
+    await conn.query("PRAGMA foreign_keys=ON");
+    return conn;
   }
 
   async saveDonation(donation: DonationEntity): Promise<DonationEntity> {

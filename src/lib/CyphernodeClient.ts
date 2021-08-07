@@ -23,6 +23,8 @@ import IRespDerivePubPath from "../types/cyphernode/IRespDerivePubPath";
 import IReqDerivePubPath from "../types/cyphernode/IReqDerivePubPath";
 import IRespWatch from "../types/cyphernode/IRespWatch";
 import IReqWatch from "../types/cyphernode/IReqWatch";
+import IReqGetNewWasabiAddress from "../types/cyphernode/IReqGetNewWasabiAddress";
+import IRespGetNewWasabiAddress from "../types/cyphernode/IRespGetNewWasabiAddress";
 
 class CyphernodeClient {
   private baseURL: string;
@@ -711,6 +713,47 @@ class CyphernodeClient {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as IResponseError<any>,
       } as IRespWatch;
+    }
+    return result;
+  }
+
+  async getNewWasabiAddress(
+    reqNewWasabiAddress: IReqGetNewWasabiAddress
+  ): Promise<IRespGetNewWasabiAddress> {
+    // # queries random instance for a new bech32 address
+    // # POST http://192.168.111.152:8080/wasabi_getnewaddress
+    // # BODY {"label":"Pay #12 for 2018"}
+    // # BODY {}
+    // # Empty BODY: Label will be "unknown"
+
+    // args:
+    // - instanceId, optional, id of the instance where the new address will come from
+    // - label, optional
+    //
+    // wasabi_getnewaddress response from Cyphernode:
+    // {
+    //   "address":"bc1,,,",
+    //   "keyPath":"84'/0'/0'/0/29",
+    //   "label":"MyLabel"
+    // }
+
+    logger.info("CyphernodeClient.getNewWasabiAddress:", reqNewWasabiAddress);
+
+    let result: IRespGetNewWasabiAddress;
+    const response = await this._post(
+      "/wasabi_getnewaddress",
+      reqNewWasabiAddress
+    );
+    if (response.status >= 200 && response.status < 400) {
+      result = { result: response.data };
+    } else {
+      result = {
+        error: {
+          code: ErrorCodes.InternalError,
+          message: response.data.message,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as IResponseError<any>,
+      } as IRespGetNewWasabiAddress;
     }
     return result;
   }

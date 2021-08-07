@@ -11,5 +11,6 @@
     "CN_URL": "https://gatekeeper:2009/v0",
     "CN_API_ID": "003",
     "CN_API_KEY": "bdd3fc82dff1fb9193a9c15c676e79da10367a540a85cb50b736e77f452f9dc6",
-    "LN_EXPIRY_SECONDS": 3600
+    "LN_EXPIRY_SECONDS": 3600,
+    "USE_WASABI": true
 }

@@ -97,10 +97,10 @@ class Donation {
           lnInvoiceStatus = "NA";
         }
 
-        // If xpub is set in the database, let's derive next address
+        // If use_xpub is true and xpub is set in the database, let's derive next address
         // If not or xpub derivation didn't work, if donation address is fixed in the database, let's return that
         // If no fixed address in database, let's getnewaddress from cyphernode
-        if (beneficiary.xpub) {
+        if (beneficiary.useXpub && beneficiary.xpub) {
           const addresses = await this._cyphernodeClient.derivePubPath({
             pub32: beneficiary.xpub,
             path: beneficiary.path + "/" + ((beneficiary.xpubIndex || 0) + 1),
@@ -114,6 +114,13 @@ class Donation {
         if (!donationEntity.bitcoinAddress) {
           if (beneficiary.bitcoinAddress) {
             donationEntity.bitcoinAddress = beneficiary.bitcoinAddress;
+          } else if (this._donationConfig.USE_WASABI) {
+            const btcResp = await this._cyphernodeClient.getNewWasabiAddress(
+              {}
+            );
+            if (btcResp.result) {
+              donationEntity.bitcoinAddress = btcResp.result.address;
+            }
           } else {
             const btcResp = await this._cyphernodeClient.getNewBitcoinAddress();
             if (btcResp.result) {
