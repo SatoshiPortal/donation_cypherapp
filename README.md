@@ -135,5 +135,6 @@ curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donat
 ```
 
 dexec lightning lightning-cli --lightning-dir=/.lightning listinvoices | jq -Mc '.invoices | map(select((.label | startswith("donation-olivier-")) and .status == "paid"))'
+dexec lightning lightning-cli --lightning-dir=/.lightning listinvoices | jq -Mc '.invoices | map(select((.label | startswith("donation-olivier-")) and .status == "paid")) | [.[].msatoshi_received] | add'
 
 curl -d '{"id":0,"method":"reloadConfig"}' -H 'Content-Type: application/json' localhost:8000/api

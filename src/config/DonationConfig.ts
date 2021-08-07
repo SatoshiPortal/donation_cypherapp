@@ -11,4 +11,5 @@ export default interface DonationConfig {
   CN_URL: string;
   CN_API_ID: string;
   CN_API_KEY: string;
+  LN_EXPIRY_SECONDS: number;
 }

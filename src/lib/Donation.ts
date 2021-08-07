@@ -78,6 +78,7 @@ class Donation {
           label,
           description:
             "Thanks for your donation to " + beneficiary.description + "!",
+          expiry: this._donationConfig.LN_EXPIRY_SECONDS,
           callbackUrl,
         };
         const lnResp = await this._cyphernodeClient.lnCreateInvoice(
