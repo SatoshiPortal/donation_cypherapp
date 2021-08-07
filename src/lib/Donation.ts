@@ -115,9 +115,9 @@ class Donation {
           if (beneficiary.bitcoinAddress) {
             donationEntity.bitcoinAddress = beneficiary.bitcoinAddress;
           } else if (beneficiary.useWasabi) {
-            const btcResp = await this._cyphernodeClient.getNewWasabiAddress(
-              {}
-            );
+            const btcResp = await this._cyphernodeClient.getNewWasabiAddress({
+              label: beneficiary.label,
+            });
             if (btcResp.result) {
               donationEntity.bitcoinAddress = btcResp.result.address;
             }
