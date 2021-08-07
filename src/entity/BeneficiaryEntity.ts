@@ -19,6 +19,7 @@ import { DonationEntity } from "./DonationEntity";
 //   path TEXT,
 //   xpub_index INTEGER default 0,
 //   use_xpub INTEGER DEFAULT TRUE,
+//   use_wasabi INTEGER DEFAULT FALSE,
 //   active INTEGER DEFAULT TRUE,
 //   created_ts INTEGER DEFAULT CURRENT_TIMESTAMP,
 //   updated_ts INTEGER DEFAULT CURRENT_TIMESTAMP
@@ -55,6 +56,9 @@ export class BeneficiaryEntity {
 
   @Column({ type: "integer", name: "use_xpub", default: true })
   useXpub?: boolean;
+
+  @Column({ type: "integer", name: "use_wasabi", default: false })
+  useWasabi?: boolean;
 
   @Column({ type: "integer", name: "active", nullable: true, default: true })
   active?: boolean;
