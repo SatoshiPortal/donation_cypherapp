@@ -3,4 +3,5 @@ export default interface IReqGetNewWasabiAddress {
   // - label, optional
   instanceId?: number;
   label?: string;
+  amount?: number;
 }

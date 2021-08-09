@@ -15,6 +15,7 @@ import path from "path";
 import IReqCreateDonation from "../types/IReqCreateDonation";
 import { Donation } from "./Donation";
 import IRespDonation from "../types/IRespDonation";
+import IReqUpdateDonation from "../types/IReqUpdateDonation";
 
 class HttpServer {
   // Create a new express application instance
@@ -58,16 +59,26 @@ class HttpServer {
   async createDonation(params: object | undefined): Promise<IRespDonation> {
     logger.debug("/createDonation params:", params);
 
-    // - address, required, desination address
-    // - amount, required, amount to send to the destination address
-    // - batcherId, optional, the id of the batcher to which the output will be added, default batcher if not supplied, overrides batcherLabel
-    // - batcherLabel, optional, the label of the batcher to which the output will be added, default batcher if not supplied
-    // - webhookUrl, optional, the webhook to call when the batch is broadcast
+    // - beneficiaryLabel, required, label of the donation beneficiary
+    // - amount, optional, amount to send to the destination address
 
     const reqCreateDonation: IReqCreateDonation = params as IReqCreateDonation;
     logger.debug("reqCreateDonation:", reqCreateDonation);
 
     return await this._donation.createDonation(reqCreateDonation);
+  }
+
+  async updateDonation(params: object | undefined): Promise<IRespDonation> {
+    logger.debug("/updateDonation params:", params);
+
+    // - beneficiaryLabel, required, label of the donation beneficiary
+    // - donationToken, required, donation token
+    // - lnMsatoshi, optional, amount to send to the destination address
+
+    const reqUpdateDonation: IReqUpdateDonation = params as IReqUpdateDonation;
+    logger.debug("reqUpdateDonation:", reqUpdateDonation);
+
+    return await this._donation.updateDonation(reqUpdateDonation);
   }
 
   async getDonation(params: object | undefined): Promise<IRespDonation> {
@@ -110,6 +121,23 @@ class HttpServer {
               }
             );
             logger.debug("released lock donationModif in createDonation");
+
+            response.result = result.result;
+            response.error = result.error;
+            break;
+          }
+
+          case "updateDonation": {
+            let result: IRespDonation = {};
+
+            result = await this._lock.acquire(
+              "donationModif",
+              async (): Promise<IRespDonation> => {
+                logger.debug("acquired lock donationModif in updateDonation");
+                return await this.updateDonation(reqMessage.params || {});
+              }
+            );
+            logger.debug("released lock donationModif in updateDonation");
 
             response.result = result.result;
             response.error = result.error;

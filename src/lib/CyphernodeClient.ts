@@ -25,6 +25,7 @@ import IRespWatch from "../types/cyphernode/IRespWatch";
 import IReqWatch from "../types/cyphernode/IReqWatch";
 import IReqGetNewWasabiAddress from "../types/cyphernode/IReqGetNewWasabiAddress";
 import IRespGetNewWasabiAddress from "../types/cyphernode/IRespGetNewWasabiAddress";
+import IReqGetNewAddress from "../types/cyphernode/IReqGetNewAddress";
 
 class CyphernodeClient {
   private baseURL: string;
@@ -582,15 +583,24 @@ class CyphernodeClient {
     return result;
   }
 
-  async getNewBitcoinAddress(): Promise<IRespGetNewAddress> {
+  async getNewBitcoinAddress(
+    newAddressTO: IReqGetNewAddress
+  ): Promise<IRespGetNewAddress> {
     // GET http://192.168.111.152:8080/getnewaddress
+    // or...
+    // POST http://192.168.111.152:8080/getnewaddress
+    // BODY {"address_type":"bech32","label":"myLabel"}
+    // BODY {"label":"myLabel"}
+    // BODY {"address_type":"p2sh-segwit"}
+    // BODY {}
 
     // getnewaddress response from Cyphernode:
-    // {"address":"bc1address"}
+    // {"address":"bc1address","label":"myLabel","address_type":"bech32"}
 
     logger.info("CyphernodeClient.getNewBitcoinAddress");
 
     let result: IRespGetNewAddress;
+    // const response = await this._post("/getnewaddress", newAddressTO);
     const response = await this._get("/getnewaddress");
     if (response.status >= 200 && response.status < 400) {
       result = { result: response.data };

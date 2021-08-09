@@ -5,7 +5,7 @@ export default interface IDonationPublic {
   bitcoinAmount?: number;
   bitcoinPaidTimestamp?: Date;
   bolt11?: string;
-  lnInvoiceStatus?: string;
+  lnInvoiceStatus?: string | null;
   lnPaymentDetails?: string;
   lnMsatoshi?: number;
   lnPaidTimestamp?: Date;

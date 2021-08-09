@@ -14,6 +14,8 @@ import IRespDonation from "../types/IRespDonation";
 import IReqWatch from "../types/cyphernode/IReqWatch";
 import IRespWatch from "../types/cyphernode/IRespWatch";
 import { randomBytes } from "crypto";
+import IReqUpdateDonation from "../types/IReqUpdateDonation";
+import { UpdateDonationValidator } from "./validators/UpdateDonationValidator";
 
 class Donation {
   private _donationConfig: DonationConfig;
@@ -59,6 +61,7 @@ class Donation {
         };
       } else {
         let donationEntity = new DonationEntity();
+        donationEntity.beneficiary = beneficiary;
 
         donationEntity.donationToken = randomBytes(16).toString("hex");
 
@@ -70,31 +73,19 @@ class Donation {
           "/" +
           donationEntity.donationToken;
 
-        // Let's create a ln invoice
-        const label: string =
-          "donation-" + beneficiary.label + "-" + donationEntity.donationToken;
+        let lnInvoiceStatus = null;
+        let bolt11 = null;
 
-        const lnCreateInvoiceTO: IReqLnCreateInvoice = {
-          label,
-          description:
-            "Thanks for your donation to " + beneficiary.description + "!",
-          expiry: this._donationConfig.LN_EXPIRY_SECONDS,
-          callbackUrl,
-        };
-        const lnResp = await this._cyphernodeClient.lnCreateInvoice(
-          lnCreateInvoiceTO
-        );
-        let lnInvoiceStatus: string;
+        if (donationReq.lnMsatoshi) {
+          // If lnMsatoshi supplied, let's create a ln invoice
 
-        // logger.debug("Donation.createDonation, lnResp:", lnResp);
+          donationEntity.lnMsatoshi = donationReq.lnMsatoshi;
 
-        if (lnResp.result) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          donationEntity.bolt11 = (lnResp.result as any).bolt11;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          lnInvoiceStatus = (lnResp.result as any).status;
-        } else {
-          lnInvoiceStatus = "NA";
+          ({ bolt11, lnInvoiceStatus } = await this.createLnInvoice(
+            donationEntity,
+            callbackUrl
+          ));
+          donationEntity.bolt11 = bolt11;
         }
 
         // If use_xpub is true and xpub is set in the database, let's derive next address
@@ -117,12 +108,15 @@ class Donation {
           } else if (beneficiary.useWasabi) {
             const btcResp = await this._cyphernodeClient.getNewWasabiAddress({
               label: beneficiary.label,
+              amount: 0.0001,
             });
             if (btcResp.result) {
               donationEntity.bitcoinAddress = btcResp.result.address;
             }
           } else {
-            const btcResp = await this._cyphernodeClient.getNewBitcoinAddress();
+            const btcResp = await this._cyphernodeClient.getNewBitcoinAddress({
+              label: beneficiary.label,
+            });
             if (btcResp.result) {
               donationEntity.bitcoinAddress = btcResp.result.address;
             }
@@ -143,7 +137,6 @@ class Donation {
         }
 
         // Save donation, will generate id
-        donationEntity.beneficiary = beneficiary;
         donationEntity = await this._donationDB.saveDonation(donationEntity);
 
         response.result = {
@@ -187,6 +180,151 @@ class Donation {
     return response;
   }
 
+  async createLnInvoice(
+    donationEntity: DonationEntity,
+    callbackUrl: string
+  ): Promise<{
+    bolt11: string;
+    lnInvoiceStatus: string;
+  }> {
+    // Let's create a ln invoice
+
+    const label: string =
+      "donation-" +
+      donationEntity.beneficiary.label +
+      "-" +
+      donationEntity.donationToken;
+
+    const lnCreateInvoiceTO: IReqLnCreateInvoice = {
+      label,
+      description:
+        "Thanks for your donation to " +
+        donationEntity.beneficiary.description +
+        "!",
+      expiry: this._donationConfig.LN_EXPIRY_SECONDS,
+      callbackUrl,
+      msatoshi: donationEntity.lnMsatoshi,
+    };
+    const lnResp = await this._cyphernodeClient.lnCreateInvoice(
+      lnCreateInvoiceTO
+    );
+    let bolt11 = null;
+    let lnInvoiceStatus = null;
+
+    // logger.debug("Donation.createDonation, lnResp:", lnResp);
+
+    if (lnResp.result) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bolt11 = (lnResp.result as any).bolt11;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      lnInvoiceStatus = (lnResp.result as any).status;
+    }
+
+    return { bolt11, lnInvoiceStatus };
+  }
+
+  async updateDonation(
+    donationReq: IReqUpdateDonation
+  ): Promise<IRespDonation> {
+    logger.info("Donation.updateDonation, donationReq:", donationReq);
+
+    const response: IRespDonation = {};
+
+    if (UpdateDonationValidator.validateRequest(donationReq)) {
+      // Inputs are valid.
+      logger.debug("Donation.updateDonation, Inputs are valid.");
+
+      let donationEntity = await this._donationDB.getDonationByToken(
+        donationReq.donationToken
+      );
+
+      if (donationEntity != null) {
+        logger.debug(
+          "Donation.updateDonation, donationEntity found for this donationToken!"
+        );
+
+        if (!donationEntity.bolt11) {
+          // Let's create a ln invoice
+          const callbackUrl =
+            this._donationConfig.URL_API_SERVER +
+            ":" +
+            this._donationConfig.URL_API_PORT +
+            this._donationConfig.URL_CTX_WEBHOOKS +
+            "/" +
+            donationEntity.donationToken;
+
+          donationEntity.lnMsatoshi = donationReq.lnMsatoshi;
+
+          const { bolt11, lnInvoiceStatus } = await this.createLnInvoice(
+            donationEntity,
+            callbackUrl
+          );
+          donationEntity.bolt11 = bolt11;
+
+          donationEntity = await this._donationDB.saveDonation(donationEntity);
+
+          response.result = {
+            donationToken: donationEntity.donationToken,
+            bitcoinAddress: donationEntity.bitcoinAddress,
+            bitcoinAmount: donationEntity.bitcoinAmount,
+            bolt11: donationEntity.bolt11,
+            lnInvoiceStatus,
+            lnMsatoshi: donationEntity.lnMsatoshi,
+            beneficiaryDescription: donationEntity.beneficiary.description,
+          };
+          if (donationEntity.lnPaidTimestamp) {
+            response.result = Object.assign(response.result, {
+              lnPaidTimestamp: new Date(donationEntity.lnPaidTimestamp),
+              lnPaymentDetails: donationEntity.lnPaymentDetails
+                ? JSON.parse(donationEntity.lnPaymentDetails)
+                : null,
+            });
+          }
+          if (donationEntity.bitcoinPaidTimestamp) {
+            response.result = Object.assign(response.result, {
+              bitcoinPaidTimestamp: new Date(
+                donationEntity.bitcoinPaidTimestamp
+              ),
+              bitcoinPaymentDetails: donationEntity.bitcoinPaymentDetails
+                ? JSON.parse(donationEntity.bitcoinPaymentDetails)
+                : null,
+            });
+          }
+        } else {
+          // Active Donation not found
+          logger.debug(
+            "Donation.updateDonation, Donation already has a bolt11."
+          );
+
+          response.error = {
+            code: ErrorCodes.InvalidRequest,
+            message: "Donation already has a bolt11",
+          };
+        }
+      } else {
+        // Active Donation not found
+        logger.debug("Donation.updateDonation, Donation not found.");
+
+        response.error = {
+          code: ErrorCodes.InvalidRequest,
+          message: "Donation not found",
+        };
+      }
+    } else {
+      // There is an error with inputs
+      logger.debug("Donation.updateDonation, there is an error with inputs.");
+
+      response.error = {
+        code: ErrorCodes.InvalidRequest,
+        message: "Invalid arguments",
+      };
+    }
+
+    logger.debug("Donation.createDonation, responding:", response);
+
+    return response;
+  }
+
   async getDonation(donationToken: string): Promise<IRespDonation> {
     logger.info("Donation.getDonation, donationToken:", donationToken);
 
@@ -205,24 +343,28 @@ class Donation {
           "Donation.getDonation, donationEntity found for this donationToken!"
         );
 
-        const label: string =
-          "donation-" +
-          donationEntity.beneficiary.label +
-          "-" +
-          donationEntity.donationToken;
+        let lnInvoiceStatus = null;
 
-        const lnResp = await this._cyphernodeClient.lnGetInvoice(label);
-        let lnInvoiceStatus: string;
+        if (donationEntity.bolt11) {
+          const label: string =
+            "donation-" +
+            donationEntity.beneficiary.label +
+            "-" +
+            donationEntity.donationToken;
 
-        // logger.debug("Donation.getDonation, lnResp:", lnResp);
+          const lnResp = await this._cyphernodeClient.lnGetInvoice(label);
 
-        if (lnResp.result) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          lnInvoiceStatus = (lnResp.result as any).invoices[0].status;
-        } else {
-          lnInvoiceStatus = "NA";
+          // logger.debug("Donation.getDonation, lnResp:", lnResp);
+
+          if (lnResp.result) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            lnInvoiceStatus = (lnResp.result as any).invoices[0].status;
+          }
+          logger.debug(
+            "Donation.getDonation, lnInvoiceStatus:",
+            lnInvoiceStatus
+          );
         }
-        logger.debug("Donation.getDonation, lnInvoiceStatus:", lnInvoiceStatus);
 
         response.result = {
           donationToken: donationEntity.donationToken,
