@@ -60,7 +60,7 @@ export class DonationEntity {
   @Column({ type: "text", name: "ln_payment_details", nullable: true })
   lnPaymentDetails?: string;
 
-  @Column({ type: "real", name: "ln_msatoshi", nullable: true })
+  @Column({ type: "integer", name: "ln_msatoshi", nullable: true })
   lnMsatoshi?: number;
 
   @Column({ type: "integer", name: "ln_paid_ts", nullable: true })

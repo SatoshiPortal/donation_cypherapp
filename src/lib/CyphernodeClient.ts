@@ -600,8 +600,8 @@ class CyphernodeClient {
     logger.info("CyphernodeClient.getNewBitcoinAddress");
 
     let result: IRespGetNewAddress;
-    // const response = await this._post("/getnewaddress", newAddressTO);
-    const response = await this._get("/getnewaddress");
+    const response = await this._post("/getnewaddress", newAddressTO);
+    // const response = await this._get("/getnewaddress");
     if (response.status >= 200 && response.status < 400) {
       result = { result: response.data };
     } else {
