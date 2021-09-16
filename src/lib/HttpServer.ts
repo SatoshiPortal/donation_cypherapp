@@ -16,6 +16,8 @@ import IReqCreateDonation from "../types/IReqCreateDonation";
 import { Donation } from "./Donation";
 import IRespDonation from "../types/IRespDonation";
 import IReqUpdateDonation from "../types/IReqUpdateDonation";
+import IReqBeneficiary from "../types/IReqBeneficiary";
+import IRespBeneficiary from "../types/IRespBeneficiary";
 
 class HttpServer {
   // Create a new express application instance
@@ -90,6 +92,41 @@ class HttpServer {
     return await this._donation.getDonation(donationToken);
   }
 
+  async createBeneficiary(
+    params: object | undefined
+  ): Promise<IRespBeneficiary> {
+    logger.debug("/createBeneficiary params:", params);
+
+    // - label, required, label of the beneficiary
+
+    const reqCreateBeneficiary: IReqBeneficiary = params as IReqBeneficiary;
+    logger.debug("reqCreateBeneficiary:", reqCreateBeneficiary);
+
+    return await this._donation.createBeneficiary(reqCreateBeneficiary);
+  }
+
+  async getBeneficiary(params: object | undefined): Promise<IRespBeneficiary> {
+    logger.debug("/getBeneficiary params:", params);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const beneficiaryId = (params as any).beneficiaryId;
+
+    return await this._donation.getBeneficiary(beneficiaryId);
+  }
+
+  async updateBeneficiary(
+    params: object | undefined
+  ): Promise<IRespBeneficiary> {
+    logger.debug("/updateBeneficiary params:", params);
+
+    // - label, required, label of the beneficiary
+
+    const reqBeneficiary: IReqBeneficiary = params as IReqBeneficiary;
+    logger.debug("reqBeneficiary:", reqBeneficiary);
+
+    return await this._donation.updateBeneficiary(reqBeneficiary);
+  }
+
   async start(): Promise<void> {
     logger.info("Starting incredible service");
 
@@ -159,6 +196,46 @@ class HttpServer {
             response.result = result.result;
             response.error = result.error;
 
+            break;
+          }
+
+          case "createBeneficiary": {
+            let result: IRespBeneficiary = {};
+
+            result = await this.createBeneficiary(reqMessage.params || {});
+
+            response.result = result.result;
+            response.error = result.error;
+            break;
+          }
+
+          case "getBeneficiary": {
+            let result: IRespBeneficiary = {};
+
+            result = await this.getBeneficiary(reqMessage.params || {});
+
+            response.result = result.result;
+            response.error = result.error;
+
+            break;
+          }
+
+          case "updateBeneficiary": {
+            let result: IRespBeneficiary = {};
+
+            result = await this._lock.acquire(
+              "beneficiaryModif",
+              async (): Promise<IRespBeneficiary> => {
+                logger.debug(
+                  "acquired lock beneficiaryModif in updateBeneficiary"
+                );
+                return await this.updateBeneficiary(reqMessage.params || {});
+              }
+            );
+            logger.debug("released lock beneficiaryModif in updateBeneficiary");
+
+            response.result = result.result;
+            response.error = result.error;
             break;
           }
 

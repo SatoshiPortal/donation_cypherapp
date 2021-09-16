@@ -16,23 +16,35 @@ services:
     restart: always
     labels:
       - "traefik.docker.network=cyphernodeappsnet"
-      # PathPrefix won't be stripped because we don't want outsiders to access /api, only /donation/...
-      - "traefik.frontend.rule=Host:donate.bullbitcoin.dev"
+      - "traefik.frontend.rule=Host:api.donate.yourdomain.dev"
+#        - "traefik.frontend.rule=PathPrefixStrip:/donation"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.enable=true"
       - "traefik.port=8000"
-      - "traefik.domain=donate.bullbitcoin.dev"
-      - "traefik.frontend.headers.allowedHosts=donate.bullbitcoin.dev"
-  deploy:
+      - "traefik.domain=api.donate.yourdomain.dev"
+      - "traefik.frontend.headers.allowedHosts=api.donate.yourdomain.dev"
+      - "traefik.frontend.rateLimit.extractorFunc=request.host"
+      - "traefik.frontend.rateLimit.rateSet.rateset1.period=1s"
+      - "traefik.frontend.rateLimit.rateSet.rateset1.average=1"
+      - "traefik.frontend.rateLimit.rateSet.rateset1.burst=2"
+      # yourapiuser:82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe
+      - "traefik.frontend.auth.basic.users=yourapiuser:$$2y$$05$$M0vR2UtI.I5JlV9Ha3j/buXwfXuyG6QqnjSBgSkkJomGaynIS1lPO"
+    deploy:
       labels:
         - "traefik.docker.network=cyphernodeappsnet"
-        # PathPrefix won't be stripped because we don't want outsiders to access /api, only /donation/...
-        - "traefik.frontend.rule=Host:donate.bullbitcoin.dev"
+        - "traefik.frontend.rule=Host:api.donate.yourdomain.dev"
+#        - "traefik.frontend.rule=PathPrefixStrip:/donation"
         - "traefik.frontend.passHostHeader=true"
         - "traefik.enable=true"
         - "traefik.port=8000"
-        - "traefik.domain=donate.bullbitcoin.dev"
-        - "traefik.frontend.headers.allowedHosts=donate.bullbitcoin.dev"
+        - "traefik.domain=api.donate.yourdomain.dev"
+        - "traefik.frontend.headers.allowedHosts=api.donate.yourdomain.dev"
+        - "traefik.frontend.rateLimit.extractorFunc=request.host"
+        - "traefik.frontend.rateLimit.rateSet.rateset1.period=1s"
+        - "traefik.frontend.rateLimit.rateSet.rateset1.average=1"
+        - "traefik.frontend.rateLimit.rateSet.rateset1.burst=2"
+        # yourapiuser:82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe
+        - "traefik.frontend.auth.basic.users=yourapiuser:$$2y$$05$$M0vR2UtI.I5JlV9Ha3j/buXwfXuyG6QqnjSBgSkkJomGaynIS1lPO"
       replicas: 1
       placement:
         constraints:
@@ -45,3 +57,9 @@ services:
 networks:
   cyphernodeappsnet:
     external: true
+
+# This is how you can generate a random authentication key:
+# server:~$ dd if=/dev/urandom bs=32 count=1 2> /dev/null | xxd -ps -c 32
+# 82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe
+# server:~$ htpasswd -bnB yourapiuser '82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe' | sed 's/\$/\$\$/g'
+# yourapiuser:$$2y$$05$$M0vR2UtI.I5JlV9Ha3j/buXwfXuyG6QqnjSBgSkkJomGaynIS1lPO

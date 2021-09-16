@@ -76,6 +76,36 @@ class DonationDB {
     return d as DonationEntity;
   }
 
+  async saveBeneficiary(
+    beneficiary: BeneficiaryEntity
+  ): Promise<BeneficiaryEntity> {
+    // logger.debug("Donation.saveBeneficiary, beneficiary =", beneficiary);
+
+    await this._db?.manager.getRepository(BeneficiaryEntity).save(beneficiary);
+
+    // Weird bug in TypeOrm save, it doesn't return the entire object, so let's
+    // refetch it!
+    const b = await this.getBeneficiaryById(beneficiary.beneficiaryId);
+
+    // logger.debug("Donation.saveBeneficiary, b =", b);
+
+    return b as BeneficiaryEntity;
+  }
+
+  async getBeneficiaryById(beneficiaryId: number): Promise<BeneficiaryEntity> {
+    const b = await this._db?.manager
+      .getRepository(BeneficiaryEntity)
+      .findOne(beneficiaryId);
+
+    // We need to instantiate a new Date with expiration:
+    // https://github.com/typeorm/typeorm/issues/4320
+    if (b) {
+      b.active = ((b.active as unknown) as number) == 1;
+    }
+
+    return b as BeneficiaryEntity;
+  }
+
   async getBeneficiaryByLabel(label: string): Promise<BeneficiaryEntity> {
     const b = await this._db?.manager
       .getRepository(BeneficiaryEntity)

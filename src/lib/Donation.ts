@@ -16,6 +16,11 @@ import IRespWatch from "../types/cyphernode/IRespWatch";
 import { randomBytes } from "crypto";
 import IReqUpdateDonation from "../types/IReqUpdateDonation";
 import { UpdateDonationValidator } from "./validators/UpdateDonationValidator";
+import IReqBeneficiary from "../types/IReqBeneficiary";
+import IRespBeneficiary from "../types/IRespBeneficiary";
+import { CreateBeneficiaryValidator } from "./validators/CreateBeneficiaryValidator";
+import { BeneficiaryEntity } from "../entity/BeneficiaryEntity";
+import { UpdateBeneficiaryValidator } from "./validators/UpdateBeneficiaryValidator";
 
 class Donation {
   private _donationConfig: DonationConfig;
@@ -411,6 +416,167 @@ class Donation {
     }
 
     logger.debug("Donation.getDonation, responding:", response);
+
+    return response;
+  }
+
+  async createBeneficiary(
+    beneficiaryReq: IReqBeneficiary
+  ): Promise<IRespBeneficiary> {
+    logger.info("Donation.createBeneficiary, beneficiaryReq:", beneficiaryReq);
+
+    const response: IRespBeneficiary = {};
+
+    if (CreateBeneficiaryValidator.validateRequest(beneficiaryReq)) {
+      // Inputs are valid.
+      logger.debug("Donation.createBeneficiary, Inputs are valid.");
+
+      let beneficiaryEntity;
+      try {
+        beneficiaryEntity = await this._donationDB.saveBeneficiary(
+          beneficiaryReq as BeneficiaryEntity
+        );
+
+        response.result = beneficiaryEntity;
+      } catch (ex) {
+        logger.debug("ex:", ex);
+
+        response.error = {
+          code: ErrorCodes.InvalidRequest,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          message: (ex as any).message,
+        };
+      }
+    } else {
+      // There is an error with inputs
+      logger.debug(
+        "Donation.createBeneficiary, there is an error with inputs."
+      );
+
+      response.error = {
+        code: ErrorCodes.InvalidRequest,
+        message: "Invalid arguments",
+      };
+    }
+
+    logger.debug("Donation.createBeneficiary, responding:", response);
+
+    return response;
+  }
+
+  async getBeneficiary(beneficiaryId: number): Promise<IRespBeneficiary> {
+    logger.info("Donation.getBeneficiary, beneficiaryId:", beneficiaryId);
+
+    const response: IRespBeneficiary = {};
+
+    if (beneficiaryId) {
+      // Inputs are valid.
+      logger.debug("Donation.getBeneficiary, Inputs are valid.");
+
+      const beneficiaryEntity = await this._donationDB.getBeneficiaryById(
+        beneficiaryId
+      );
+
+      if (beneficiaryEntity != null) {
+        logger.debug(
+          "Donation.getBeneficiary, beneficiaryEntity found for this beneficiaryId!"
+        );
+
+        response.result = beneficiaryEntity;
+      } else {
+        // Beneficiary not found
+        logger.debug("Donation.getBeneficiary, Beneficiary not found.");
+
+        response.error = {
+          code: ErrorCodes.InvalidRequest,
+          message: "Beneficiary not found",
+        };
+      }
+    } else {
+      // There is an error with inputs
+      logger.debug("Donation.getBeneficiary, there is an error with inputs.");
+
+      response.error = {
+        code: ErrorCodes.InvalidRequest,
+        message: "Invalid arguments",
+      };
+    }
+
+    logger.debug("Donation.getBeneficiary, responding:", response);
+
+    return response;
+  }
+
+  async updateBeneficiary(
+    beneficiaryReq: IReqBeneficiary
+  ): Promise<IRespBeneficiary> {
+    logger.info("Donation.updateBeneficiary, beneficiaryReq:", beneficiaryReq);
+
+    const response: IRespBeneficiary = {};
+
+    if (UpdateBeneficiaryValidator.validateRequest(beneficiaryReq)) {
+      // Inputs are valid.
+      logger.debug("Donation.updateBeneficiary, Inputs are valid.");
+
+      let beneficiaryEntity;
+      if (beneficiaryReq.beneficiaryId) {
+        beneficiaryEntity = await this._donationDB.getBeneficiaryById(
+          beneficiaryReq.beneficiaryId
+        );
+      } else {
+        beneficiaryEntity = await this._donationDB.getBeneficiaryByLabel(
+          beneficiaryReq.label
+        );
+      }
+
+      if (beneficiaryEntity) {
+        logger.debug(
+          "Donation.updateBeneficiary, beneficiaryEntity found for this beneficiaryId!"
+        );
+
+        try {
+          beneficiaryEntity = await this._donationDB.saveBeneficiary(
+            Object.assign(beneficiaryReq, {
+              beneficiaryId: beneficiaryEntity.beneficiaryId,
+            }) as BeneficiaryEntity
+          );
+          // logger.debug(
+          //   "Donation.updateBeneficiary, beneficiaryEntity =",
+          //   beneficiaryEntity
+          // );
+
+          response.result = beneficiaryEntity;
+        } catch (ex) {
+          logger.debug("ex:", ex);
+
+          response.error = {
+            code: ErrorCodes.InvalidRequest,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            message: (ex as any).message,
+          };
+        }
+      } else {
+        // Beneficiary not found
+        logger.debug("Donation.updateBeneficiary, Beneficiary not found.");
+
+        response.error = {
+          code: ErrorCodes.InvalidRequest,
+          message: "Beneficiary not found",
+        };
+      }
+    } else {
+      // There is an error with inputs
+      logger.debug(
+        "Donation.updateBeneficiary, there is an error with inputs."
+      );
+
+      response.error = {
+        code: ErrorCodes.InvalidRequest,
+        message: "Invalid arguments",
+      };
+    }
+
+    logger.debug("Donation.updateBeneficiary, responding:", response);
 
     return response;
   }

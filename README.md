@@ -50,6 +50,82 @@ dexec donation sqlite3 data/donation.sqlite -header "update beneficiary set xpub
 
 ## From an API client
 
+### Create a new beneficiary
+
+```bash
+curl -d '{"id":0,"method":"createBeneficiary","params":{"label":"label7008","description":"description7008","emailAddress":"emailAddress7008","phoneNumber":"phoneNumber7008"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
+{
+  "id": 0,
+  "result": {
+    "beneficiaryId": 48,
+    "label": "label7008",
+    "description": "description7008",
+    "emailAddress": "emailAddress7008",
+    "phoneNumber": "phoneNumber7008",
+    "bitcoinAddress": null,
+    "xpub": null,
+    "path": null,
+    "xpubIndex": 0,
+    "useXpub": 0,
+    "useWasabi": 0,
+    "active": true,
+    "createdAt": "2021-09-16 01:50:35",
+    "updatedAt": "2021-09-16 01:50:35"
+  }
+}
+```
+
+### Update a beneficiary
+
+```bash
+curl -d '{"id":0,"method":"updateBeneficiary","params":{"beneficiaryId":48,"label":"label7008","description":"description7008","emailAddress":"emailAddress7008","phoneNumber":"phoneNumber7008"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
+{
+  "id": 0,
+  "result": {
+    "beneficiaryId": 48,
+    "label": "label7008",
+    "description": "description7008",
+    "emailAddress": "emailAddress7008",
+    "phoneNumber": "phoneNumber7008",
+    "bitcoinAddress": null,
+    "xpub": null,
+    "path": null,
+    "xpubIndex": 0,
+    "useXpub": 0,
+    "useWasabi": 0,
+    "active": true,
+    "createdAt": "2021-09-16 01:50:35",
+    "updatedAt": "2021-09-16 01:50:35"
+  }
+}
+```
+
+### Get a beneficiary
+
+```bash
+curl -d '{"id":0,"method":"getBeneficiary","params":{"beneficiaryId":48}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
+curl -d '{"id":0,"method":"getBeneficiary","params":{"label":"label7008"}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
+{
+  "id": 0,
+  "result": {
+    "beneficiaryId": 48,
+    "label": "label7008",
+    "description": "description7008",
+    "emailAddress": "emailAddress7008",
+    "phoneNumber": "phoneNumber7008",
+    "bitcoinAddress": null,
+    "xpub": null,
+    "path": null,
+    "xpubIndex": 0,
+    "useXpub": 0,
+    "useWasabi": 0,
+    "active": true,
+    "createdAt": "2021-09-16 01:50:35",
+    "updatedAt": "2021-09-16 01:50:35"
+  }
+}
+```
+
 ### Create a donation
 
 ```bash
@@ -136,5 +212,11 @@ curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donat
 
 dexec lightning lightning-cli --lightning-dir=/.lightning listinvoices | jq -Mc '.invoices | map(select((.label | startswith("donation-olivier-")) and .status == "paid"))'
 dexec lightning lightning-cli --lightning-dir=/.lightning listinvoices | jq -Mc '.invoices | map(select((.label | startswith("donation-olivier-")) and .status == "paid")) | [.[].msatoshi_received] | add'
+dexec proxy curl localhost:8888/wasabi_gettransactions | jq '.transactions | map(select(.label[0] == "olivier"))'
+dexec donation sqlite3 data/donation.sqlite -header "select sum(ln_msatoshi) from donation where ln_paid_ts not null and beneficiary_id=1"
+dexec donation sqlite3 data/donation.sqlite -header "select sum(bitcoin_amount) from donation where bitcoin_paid_ts not null and beneficiary_id=1"
+
+dexec donation sqlite3 data/donation.sqlite -header "select datetime(round(ln_paid_ts/1000), 'unixepoch'), ln_msatoshi/1000 from donation where ln_paid_ts not null and beneficiary_id=1 order by ln_msatoshi desc"
+dexec donation sqlite3 data/donation.sqlite -header "select datetime(round(bitcoin_paid_ts/1000), 'unixepoch'), bitcoin_amount from donation where bitcoin_paid_ts not null and beneficiary_id=1 order by bitcoin_amount desc"
 
 curl -d '{"id":0,"method":"reloadConfig"}' -H 'Content-Type: application/json' localhost:8000/api
