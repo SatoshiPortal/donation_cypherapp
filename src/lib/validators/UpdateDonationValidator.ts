@@ -2,8 +2,8 @@ import IReqUpdateDonation from "../../types/IReqUpdateDonation";
 
 class UpdateDonationValidator {
   static validateRequest(request: IReqUpdateDonation): boolean {
-    if (request.beneficiaryLabel && request.donationToken) {
-      // Mandatory beneficiaryLabel and donationToken found
+    if (request.donationToken) {
+      // Mandatory donationToken found
       return true;
     }
     return false;

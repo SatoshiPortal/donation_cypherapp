@@ -1,5 +1,11 @@
 version: "3"
 
+# This is how you can generate a random authentication key:
+# server:~$ dd if=/dev/urandom bs=32 count=1 2> /dev/null | xxd -ps -c 32
+# 82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe
+# server:~$ htpasswd -bnB yourapiuser '82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe' | sed 's/\$/\$\$/g'
+# yourapiuser:$$2y$$05$$M0vR2UtI.I5JlV9Ha3j/buXwfXuyG6QqnjSBgSkkJomGaynIS1lPO
+
 services:
   donation:
     environment:
@@ -57,9 +63,3 @@ services:
 networks:
   cyphernodeappsnet:
     external: true
-
-# This is how you can generate a random authentication key:
-# server:~$ dd if=/dev/urandom bs=32 count=1 2> /dev/null | xxd -ps -c 32
-# 82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe
-# server:~$ htpasswd -bnB yourapiuser '82b5313656818b70d900c32c3bf8ea502705048392f96a4c4f65d0e270d576fe' | sed 's/\$/\$\$/g'
-# yourapiuser:$$2y$$05$$M0vR2UtI.I5JlV9Ha3j/buXwfXuyG6QqnjSBgSkkJomGaynIS1lPO

@@ -150,7 +150,7 @@ curl -d '{"id":0,"method":"createDonation","params":{"beneficiaryLabel":"olivier
 ### Let's see it
 
 ```bash
-curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donationToken":"6bcc7b54ae01b00fcf13c2d3151dd745"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
+curl -d '{"id":0,"method":"getDonation","params":{"donationToken":"6bcc7b54ae01b00fcf13c2d3151dd745"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
 {
   "id": 0,
   "result": {
@@ -171,7 +171,7 @@ curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donat
 ### Paid using LN
 
 ```bash
-curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donationToken":"6bcc7b54ae01b00fcf13c2d3151dd745"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
+curl -d '{"id":0,"method":"getDonation","params":{"donationToken":"6bcc7b54ae01b00fcf13c2d3151dd745"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
 {
   "id": 0,
   "result": {
@@ -192,7 +192,7 @@ curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donat
 ### Paid using on-chain Bitcoin
 
 ```bash
-curl -d '{"id":0,"method":"getDonation","params":{"beneficiary":"olivier","donationToken":"6bcc7b54ae01b00fcf13c2d3151dd745"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
+curl -d '{"id":0,"method":"getDonation","params":{"donationToken":"6bcc7b54ae01b00fcf13c2d3151dd745"}}' -H 'Content-Type: application/json' https://donate.bullbitcoin.dev/api | jq
 {
   "id": 0,
   "result": {
