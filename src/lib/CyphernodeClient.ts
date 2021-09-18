@@ -1,6 +1,6 @@
 import logger from "./Log2File";
 import crypto from "crypto";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import https from "https";
 import path from "path";
 import fs from "fs";
@@ -78,6 +78,7 @@ class CyphernodeClient {
       url: url,
       method: "post",
       baseURL: this.baseURL,
+      timeout: 60000,
       headers: {
         Authorization: "Bearer " + this._generateToken(),
       },
@@ -101,36 +102,46 @@ class CyphernodeClient {
       logger.debug("CyphernodeClient._post :: response.data:", response.data);
 
       return { status: response.status, data: response.data };
-    } catch (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        logger.info(
-          "CyphernodeClient._post :: error.response.data:",
-          error.response.data
-        );
-        logger.info(
-          "CyphernodeClient._post :: error.response.status:",
-          error.response.status
-        );
-        logger.info(
-          "CyphernodeClient._post :: error.response.headers:",
-          error.response.headers
-        );
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const error: AxiosError = err;
 
-        return { status: error.response.status, data: error.response.data };
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        logger.info("CyphernodeClient._post :: error.message:", error.message);
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          logger.info(
+            "CyphernodeClient._post :: error.response.data:",
+            error.response.data
+          );
+          logger.info(
+            "CyphernodeClient._post :: error.response.status:",
+            error.response.status
+          );
+          logger.info(
+            "CyphernodeClient._post :: error.response.headers:",
+            error.response.headers
+          );
 
-        return { status: -1, data: error.message };
+          return { status: error.response.status, data: error.response.data };
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          logger.info(
+            "CyphernodeClient._post :: error.message:",
+            error.message
+          );
+
+          return { status: -1, data: error.message };
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          logger.info("CyphernodeClient._post :: Error:", error.message);
+
+          return { status: -2, data: error.message };
+        }
       } else {
-        // Something happened in setting up the request that triggered an Error
-        logger.info("CyphernodeClient._post :: Error:", error.message);
-
-        return { status: -2, data: error.message };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return { status: -2, data: (err as any).message };
       }
     }
   }
@@ -143,6 +154,7 @@ class CyphernodeClient {
       url: url,
       method: "get",
       baseURL: this.baseURL,
+      timeout: 30000,
       headers: {
         Authorization: "Bearer " + this._generateToken(),
       },
@@ -160,36 +172,43 @@ class CyphernodeClient {
       logger.debug("CyphernodeClient._get :: response.data:", response.data);
 
       return { status: response.status, data: response.data };
-    } catch (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        logger.info(
-          "CyphernodeClient._get :: error.response.data:",
-          error.response.data
-        );
-        logger.info(
-          "CyphernodeClient._get :: error.response.status:",
-          error.response.status
-        );
-        logger.info(
-          "CyphernodeClient._get :: error.response.headers:",
-          error.response.headers
-        );
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const error: AxiosError = err;
 
-        return { status: error.response.status, data: error.response.data };
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        logger.info("CyphernodeClient._get :: error.message:", error.message);
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          logger.info(
+            "CyphernodeClient._get :: error.response.data:",
+            error.response.data
+          );
+          logger.info(
+            "CyphernodeClient._get :: error.response.status:",
+            error.response.status
+          );
+          logger.info(
+            "CyphernodeClient._get :: error.response.headers:",
+            error.response.headers
+          );
 
-        return { status: -1, data: error.message };
+          return { status: error.response.status, data: error.response.data };
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          logger.info("CyphernodeClient._get :: error.message:", error.message);
+
+          return { status: -1, data: error.message };
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          logger.info("CyphernodeClient._get :: Error:", error.message);
+
+          return { status: -2, data: error.message };
+        }
       } else {
-        // Something happened in setting up the request that triggered an Error
-        logger.info("CyphernodeClient._get :: Error:", error.message);
-
-        return { status: -2, data: error.message };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return { status: -2, data: (err as any).message };
       }
     }
   }
@@ -205,7 +224,7 @@ class CyphernodeClient {
     // - webhookUrl, optional, the webhook to call when the batch is broadcast
 
     // response:
-    // - donationId, the id of the donation
+    // - batcherId, the id of the batcher
     // - outputId, the id of the added output
     // - nbOutputs, the number of outputs currently in the batch
     // - oldest, the timestamp of the oldest output in the batch
@@ -242,7 +261,7 @@ class CyphernodeClient {
     // - outputId, required, id of the output to remove
     //
     // response:
-    // - donationId, the id of the donation
+    // - batcherId, the id of the batcher
     // - outputId, the id of the removed output if found
     // - nbOutputs, the number of outputs currently in the batch
     // - oldest, the timestamp of the oldest output in the batch
@@ -277,15 +296,15 @@ class CyphernodeClient {
     // POST (GET) http://192.168.111.152:8080/getbatchdetails
     //
     // args:
-    // - donationId, optional, id of the donation, overrides donationLabel, default donation will be spent if not supplied
-    // - donationLabel, optional, label of the donation, default donation will be used if not supplied
+    // - batcherId, optional, id of the batcher, overrides batcherLabel, default batcher will be spent if not supplied
+    // - batcherLabel, optional, label of the batcher, default batcher will be used if not supplied
     // - txid, optional, if you want the details of an executed batch, supply the batch txid, will return current pending batch
     //     if not supplied
     //
     // response:
     // {"result":{
-    //    "donationId":34,
-    //    "donationLabel":"Special donation for a special client",
+    //    "batcherId":34,
+    //    "batcherLabel":"Special batcher for a special client",
     //    "confTarget":6,
     //    "nbOutputs":83,
     //    "oldest":123123,
@@ -309,7 +328,7 @@ class CyphernodeClient {
     // },"error":null}
     //
     // BODY {}
-    // BODY {"donationId":34}
+    // BODY {"batcherId":34}
 
     logger.info("CyphernodeClient.getBatchDetails:", batchIdent);
 
@@ -334,10 +353,10 @@ class CyphernodeClient {
     // POST http://192.168.111.152:8080/batchspend
     //
     // args:
-    // - donationId, optional, id of the donation to execute, overrides donationLabel, default donation will be spent if not supplied
-    // - donationLabel, optional, label of the donation to execute, default donation will be executed if not supplied
-    // - confTarget, optional, overrides default value of createdonation, default to value of createdonation, default Bitcoin Core conf_target will be used if not supplied
-    // NOTYET - feeRate, optional, overrides confTarget if supplied, overrides default value of createdonation, default to value of createdonation, default Bitcoin Core value will be used if not supplied
+    // - batcherId, optional, id of the batcher to execute, overrides batcherLabel, default batcher will be spent if not supplied
+    // - batcherLabel, optional, label of the batcher to execute, default batcher will be executed if not supplied
+    // - confTarget, optional, overrides default value of createbatcher, default to value of createbatcher, default Bitcoin Core conf_target will be used if not supplied
+    // NOTYET - feeRate, optional, overrides confTarget if supplied, overrides default value of createbatcher, default to value of createbatcher, default Bitcoin Core value will be used if not supplied
     //
     // response:
     // - txid, the transaction txid
@@ -349,8 +368,8 @@ class CyphernodeClient {
     // - outputs
     //
     // {"result":{
-    //    "donationId":34,
-    //    "donationLabel":"Special donation for a special client",
+    //    "batcherId":34,
+    //    "batcherLabel":"Special batcher for a special client",
     //    "confTarget":6,
     //    "nbOutputs":83,
     //    "oldest":123123,
@@ -374,9 +393,9 @@ class CyphernodeClient {
     // },"error":null}
     //
     // BODY {}
-    // BODY {"donationId":34,"confTarget":12}
-    // NOTYET BODY {"donationLabel":"highfees","feeRate":233.7}
-    // BODY {"donationId":411,"confTarget":6}
+    // BODY {"batcherId":34,"confTarget":12}
+    // NOTYET BODY {"batcherLabel":"highfees","feeRate":233.7}
+    // BODY {"batcherId":411,"confTarget":6}
 
     logger.info("CyphernodeClient.batchSpend:", batchSpendTO);
 
@@ -671,6 +690,7 @@ class CyphernodeClient {
     // "address":"${address}",
     // "unconfirmedCallbackURL":${cb0conf_url},
     // "confirmedCallbackURL":${cb1conf_url},
+    // "label":${label},
     // "estimatesmartfee2blocks":${fees2blocks},
     // "estimatesmartfee6blocks":${fees6blocks},
     // "estimatesmartfee36blocks":${fees36blocks},

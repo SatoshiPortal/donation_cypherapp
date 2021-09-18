@@ -5,6 +5,7 @@ export default interface IReqWatch {
   // - eventMessage, optional
 
   address: string;
+  label?: string;
   unconfirmedCallbackURL?: string;
   confirmedCallbackURL?: string;
   eventMessage?: string;

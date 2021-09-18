@@ -112,7 +112,11 @@ class Donation {
             donationEntity.bitcoinAddress = beneficiary.bitcoinAddress;
           } else if (beneficiary.useWasabi) {
             const btcResp = await this._cyphernodeClient.getNewWasabiAddress({
-              label: beneficiary.label,
+              label:
+                "donation-" +
+                beneficiary.label +
+                "-" +
+                donationEntity.donationToken,
               amount: 0.0001,
             });
             if (btcResp.result) {
@@ -120,7 +124,11 @@ class Donation {
             }
           } else {
             const btcResp = await this._cyphernodeClient.getNewBitcoinAddress({
-              label: beneficiary.label,
+              label:
+                "donation-" +
+                beneficiary.label +
+                "-" +
+                donationEntity.donationToken,
             });
             if (btcResp.result) {
               donationEntity.bitcoinAddress = btcResp.result.address;
@@ -132,6 +140,11 @@ class Donation {
         if (donationEntity.bitcoinAddress) {
           const watchTO: IReqWatch = {
             address: donationEntity.bitcoinAddress,
+            label:
+              "donation-" +
+              beneficiary.label +
+              "-" +
+              donationEntity.donationToken,
             unconfirmedCallbackURL: callbackUrl,
             confirmedCallbackURL: callbackUrl,
           };
